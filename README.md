@@ -6,6 +6,16 @@ Welcome to **ASHBoost's** repository for the NumHack Hackathon 2024.
 
 [![Open in Colab](https://camo.githubusercontent.com/96889048f8a9014fdeba2a891f97150c6aac6e723f5190236b10215a97ed41f3/68747470733a2f2f636f6c61622e72657365617263682e676f6f676c652e636f6d2f6173736574732f636f6c61622d62616467652e737667)](https://colab.research.google.com/drive/1AvOwKIHHORKKLl_w3bhTwHoIBBW0maKo?usp=sharing)
 [![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python&logoColor=white)](https://www.python.org/)
+### Requirements
+
+[![NumPy](https://img.shields.io/badge/NumPy-%23177cce.svg?style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org)
+[![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org)
+[![IPython](https://img.shields.io/badge/ipython-%23E5E5E5.svg?style=for-the-badge&logo=python&logoColor=white)](https://ipython.org)
+[![PyVis](https://img.shields.io/badge/PyVis-%23009639.svg?style=for-the-badge&logo=python&logoColor=white)](https://pyvis.readthedocs.io/)
+[![NetworkX](https://img.shields.io/badge/NetworkX-%23193f74.svg?style=for-the-badge&logo=python&logoColor=white)](https://networkx.org/)
+[![Sentence-Transformers](https://img.shields.io/badge/Sentence--Transformers-%23FF5733.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.sbert.net/)
+[![Scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![ipywidgets](https://img.shields.io/badge/ipywidgets-%23FFDD44.svg?style=for-the-badge&logo=python&logoColor=black)](https://ipywidgets.readthedocs.io/en/latest/)
 
 ---
 
