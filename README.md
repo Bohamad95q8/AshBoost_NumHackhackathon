@@ -1,3 +1,4 @@
+# ![ASHBoost Banner]([https://example.com/path/to/banner.png](https://github.com/Bohamad95q8/AshBoost_NumHackhackathon/blob/main/Image/ASHBoostNumHack2024Analysis.png))
 # ASHBoost - NumHack Hackathon 2024 Analyze Track
 
 Welcome to **ASHBoost's** repository for the NumHack Hackathon 2024.  
