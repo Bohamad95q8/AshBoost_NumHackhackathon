@@ -1,0 +1,636 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script>function neighbourhoodHighlight(params) {
+  // console.log("in nieghbourhoodhighlight");
+  allNodes = nodes.get({ returnType: "Object" });
+  // originalNodes = JSON.parse(JSON.stringify(allNodes));
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    highlightActive = true;
+    var i, j;
+    var selectedNode = params.nodes[0];
+    var degrees = 2;
+
+    // mark all nodes as hard to read.
+    for (let nodeId in allNodes) {
+      // nodeColors[nodeId] = allNodes[nodeId].color;
+      allNodes[nodeId].color = "rgba(200,200,200,0.5)";
+      if (allNodes[nodeId].hiddenLabel === undefined) {
+        allNodes[nodeId].hiddenLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+    var connectedNodes = network.getConnectedNodes(selectedNode);
+    var allConnectedNodes = [];
+
+    // get the second degree nodes
+    for (i = 1; i < degrees; i++) {
+      for (j = 0; j < connectedNodes.length; j++) {
+        allConnectedNodes = allConnectedNodes.concat(
+          network.getConnectedNodes(connectedNodes[j])
+        );
+      }
+    }
+
+    // all second degree nodes get a different color and their label back
+    for (i = 0; i < allConnectedNodes.length; i++) {
+      // allNodes[allConnectedNodes[i]].color = "pink";
+      allNodes[allConnectedNodes[i]].color = "rgba(150,150,150,0.75)";
+      if (allNodes[allConnectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[allConnectedNodes[i]].label =
+          allNodes[allConnectedNodes[i]].hiddenLabel;
+        allNodes[allConnectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // all first degree nodes get their own color and their label back
+    for (i = 0; i < connectedNodes.length; i++) {
+      // allNodes[connectedNodes[i]].color = undefined;
+      allNodes[connectedNodes[i]].color = nodeColors[connectedNodes[i]];
+      if (allNodes[connectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[connectedNodes[i]].label =
+          allNodes[connectedNodes[i]].hiddenLabel;
+        allNodes[connectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // the main node gets its own color and its label back.
+    // allNodes[selectedNode].color = undefined;
+    allNodes[selectedNode].color = nodeColors[selectedNode];
+    if (allNodes[selectedNode].hiddenLabel !== undefined) {
+      allNodes[selectedNode].label = allNodes[selectedNode].hiddenLabel;
+      allNodes[selectedNode].hiddenLabel = undefined;
+    }
+  } else if (highlightActive === true) {
+    // console.log("highlightActive was true");
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      // allNodes[nodeId].color = "purple";
+      allNodes[nodeId].color = nodeColors[nodeId];
+      // delete allNodes[nodeId].color;
+      if (allNodes[nodeId].hiddenLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].hiddenLabel;
+        allNodes[nodeId].hiddenLabel = undefined;
+      }
+    }
+    highlightActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    // console.log("Nothing was selected");
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        // allNodes[nodeId].color = {};
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function filterHighlight(params) {
+  allNodes = nodes.get({ returnType: "Object" });
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    filterActive = true;
+    let selectedNodes = params.nodes;
+
+    // hiding all nodes and saving the label
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = true;
+      if (allNodes[nodeId].savedLabel === undefined) {
+        allNodes[nodeId].savedLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+
+    for (let i=0; i < selectedNodes.length; i++) {
+      allNodes[selectedNodes[i]].hidden = false;
+      if (allNodes[selectedNodes[i]].savedLabel !== undefined) {
+        allNodes[selectedNodes[i]].label = allNodes[selectedNodes[i]].savedLabel;
+        allNodes[selectedNodes[i]].savedLabel = undefined;
+      }
+    }
+
+  } else if (filterActive === true) {
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = false;
+      if (allNodes[nodeId].savedLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].savedLabel;
+        allNodes[nodeId].savedLabel = undefined;
+      }
+    }
+    filterActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function selectNode(nodes) {
+  network.selectNodes(nodes);
+  neighbourhoodHighlight({ nodes: nodes });
+  return nodes;
+}
+
+function selectNodes(nodes) {
+  network.selectNodes(nodes);
+  filterHighlight({nodes: nodes});
+  return nodes;
+}
+
+function highlightFilter(filter) {
+  let selectedNodes = []
+  let selectedProp = filter['property']
+  if (filter['item'] === 'node') {
+    let allNodes = nodes.get({ returnType: "Object" });
+    for (let nodeId in allNodes) {
+      if (allNodes[nodeId][selectedProp] && filter['value'].includes((allNodes[nodeId][selectedProp]).toString())) {
+        selectedNodes.push(nodeId)
+      }
+    }
+  }
+  else if (filter['item'] === 'edge'){
+    let allEdges = edges.get({returnType: 'object'});
+    // check if the selected property exists for selected edge and select the nodes connected to the edge
+    for (let edge in allEdges) {
+      if (allEdges[edge][selectedProp] && filter['value'].includes((allEdges[edge][selectedProp]).toString())) {
+        selectedNodes.push(allEdges[edge]['from'])
+        selectedNodes.push(allEdges[edge]['to'])
+      }
+    }
+  }
+  selectNodes(selectedNodes)
+}</script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+            
+            
+            
+            
+            
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/css/tom-select.min.css" integrity="sha512-43fHB3GLgZfz8QXl1RPQ8O66oIgv3po9cJ5erMt1c4QISq9dYb195T3vr5ImnJPXuVroKcGBPXBFKETW8jrPNQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/js/tom-select.complete.js" integrity="sha512-jeF9CfnvzDiw9G9xiksVjxR2lib44Gnovvkv+3CgCG6NXCD4gqlA5nDAVW5WjpA+i+/zKsUWV5xNEbW1X/HH0Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+ <div style="display: flex; align-items: center; gap: 10px;">  
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: gold; display: inline-block;"></div>
+            <span>Data Analyst</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: magenta; display: inline-block;"></div>
+            <span>Educational Specialist</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: blue; display: inline-block;"></div>
+            <span>AI Developer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: brown; display: inline-block;"></div>
+            <span>Legal Consultant</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: cyan; display: inline-block;"></div>
+            <span>AI Engineer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: salmon; display: inline-block;"></div>
+            <span>UI/UX Designer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: gray; display: inline-block;"></div>
+            <span>Data Engineer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: yellow; display: inline-block;"></div>
+            <span>Data Scientist</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: lime; display: inline-block;"></div>
+            <span>Speech Recognition Expert</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: coral; display: inline-block;"></div>
+            <span>Robotics Specialist</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: black; display: inline-block;"></div>
+            <span>Urban Planner</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: indigo; display: inline-block;"></div>
+            <span>Agronomist</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: silver; display: inline-block;"></div>
+            <span>Web Developer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: turquoise; display: inline-block;"></div>
+            <span>Cloud Engineer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: red; display: inline-block;"></div>
+            <span>AI Researcher</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: beige; display: inline-block;"></div>
+            <span>Sales Analyst</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: purple; display: inline-block;"></div>
+            <span>Software Developer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: violet; display: inline-block;"></div>
+            <span>Healthcare Specialist</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: green; display: inline-block;"></div>
+            <span>NLP Specialist</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: navy; display: inline-block;"></div>
+            <span>Software Engineer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: orange; display: inline-block;"></div>
+            <span>Embedded Systems Developer</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: pink; display: inline-block;"></div>
+            <span>Fraud Analyst</span>
+        </div> 
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 10px; height: 10px; background-color: teal; display: inline-block;"></div>
+            <span>Machine Learning Specialist</span>
+        </div></div>       <div class="card" style="width: 100%">
+            
+            
+              <div id="filter-menu" class="card-header">
+                <div class="row no-gutters">
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="updateFilter(value, 'item')"
+                            id="select-item"
+                        >
+                        <option value="">Select a network item</option>
+                        <option value="edge">edge</option>
+                        <option value="node">node</option>
+                    </select>
+                  </div>
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="updateFilter(value, 'property')"
+                            id="select-property"
+                        >
+                        <option value="">Select a property...</option>
+                    </select>
+                  </div>
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            id="select-value"
+                        >
+                        <option value="">Select value(s)...</option>
+                    </select>
+                  </div>
+                  <div class="col-1 pb-2">
+                    <button type="button" class="btn btn-primary btn-block" onclick="highlightFilter(filter);">Filter</button>
+                  </div>
+                  <div class="col-2 pb-2">
+                    <button type="button" class="btn btn-primary btn-block" onclick="clearFilter(true)">Reset Selection</button>
+                  </div>
+                </div>
+              </div>
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+                  // explicitly using onItemAdd and this function as we need to save multiple values
+                  let updateValueFilter = function() {
+                      return function () {
+                      filter['value'].push(arguments[0])
+                      }
+                  }
+
+                  let valueControl = new TomSelect("#select-value",{
+                      maxItems: null,
+                      valueField: 'id',
+                      labelField: 'title',
+                      searchField: 'title',
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: updateValueFilter()
+                  });
+
+                  let addValues = function() {
+                      return function () {
+                          // clear the current value options and add the selected attribute values
+                          // tom-select handles duplicates
+                          let selectedProperty = arguments[0];
+                          valueControl.clear();
+                          valueControl.clearOptions();
+                          filter['value'] = []
+                          if (filter['item'] === 'node') {
+                              for (let each in allNodes) {
+                                  valueControl.addOption({
+                                      id:allNodes[each][selectedProperty],
+                                      title:allNodes[each][selectedProperty]
+                                  })
+                              }
+                          }
+                          else if (filter['item'] === 'edge') {
+                              for (let each in allEdges) {
+                                  valueControl.addOption({
+                                      id:allEdges[each][selectedProperty],
+                                      title:allEdges[each][selectedProperty]
+                                  })
+                              }
+                          }
+                      }
+                  };
+
+                  let propControl = new TomSelect("#select-property",{
+                      valueField: 'id',
+                      labelField: 'title',
+                      searchField: 'title',
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: addValues()
+                  });
+
+                  let addProperties = function() {
+                      return function () {
+                          // loops through the selected network item and adds the attributes to dropdown
+                          // tom-select handles duplicates
+                          clearFilter(false)
+                          if (arguments[0] === 'edge') {
+                              for (let each in allEdges) {
+                                  if (allEdges.hasOwnProperty(each)) {
+                                      for (let eachProp in allEdges[each]) {
+                                          if (allEdges[each].hasOwnProperty(eachProp)) {
+                                              propControl.addOption({id: eachProp, title: eachProp})
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                          else if (arguments[0] === 'node') {
+                              for (let each in allNodes) {
+                                  if (allNodes.hasOwnProperty(each)) {
+                                      for (let eachProp in allNodes[each]) {
+                                          if (allNodes[each].hasOwnProperty(eachProp)
+                                              && (eachProp !== 'hidden' && eachProp !== 'savedLabel'
+                                                  && eachProp !== 'hiddenLabel')) {
+                                              propControl.addOption({id: eachProp, title: eachProp})
+
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  };
+
+                  let itemControl = new TomSelect("#select-item",{
+                      create: false,
+                      sortField:{
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: addProperties()
+                  });
+
+                  function clearFilter(reset) {
+                      // utility function to clear all the selected filter options
+                      // if reset is set to true, the existing filter will be removed
+                      // else, only the dropdown options are cleared
+                      propControl.clear();
+                      propControl.clearOptions();
+                      valueControl.clear();
+                      valueControl.clearOptions();
+                      filter = {
+                          item : '',
+                          property : '',
+                          value : []
+                      }
+                      if (reset) {
+                          itemControl.clear();
+                          filterHighlight({nodes: []})
+                      }
+                  }
+
+                  function updateFilter(value, key) {
+                      // key could be 'item' or 'property' and value is as selected in dropdown
+                      filter[key] = value
+                  }
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#97c2fc", "id": "user20", "label": "user20", "shape": "dot", "size": 10, "title": "This contributor has experience in UI/UX Design, Backend Development, Other (Specify), Domain Knowledge (Specify in Other) and is proficient in technologies like Other (Specify), Deep Learning, Computer Vision, Data Analytics/Visualization. They are interested in roles such as Designer, Other (Specify) and prefer Other (Specify) collaboration. With 5+ years of experience, they are available for Available 10 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "AI-Powered Chatbot for Customer Support", "label": "AI-Powered Chatbot for Customer Support", "shape": "dot", "size": 10, "title": "AI-Powered Chatbot for Customer Support | Developing a chatbot using AI to improve customer support interactions and provide real-time solutions. | Implementing a conversational AI system that can handle multiple queries across various domains. | Ready for deployment | [\u0027Natural Language Processing\u0027, \u0027Deep Learning\u0027, \u0027Python\u0027] | [\u0027Backend Development\u0027, \u0027Frontend Development\u0027, \u0027Chatbot Development\u0027] | Estimated completion in 6 months | Chat logs, customer interaction datasets. | Enhance customer satisfaction by reducing response time and improving issue resolution. | [\u0027AI Researcher\u0027, \u0027Software Developer\u0027, \u0027UI/UX Designer\u0027]"}, {"color": "#97c2fc", "id": "Voice Recognition for Smart Home Devices", "label": "Voice Recognition for Smart Home Devices", "shape": "dot", "size": 10, "title": "Voice Recognition for Smart Home Devices | Developing a voice recognition system for seamless interaction with smart home devices. | Implementing algorithms for speech recognition and intent analysis. | Completed prototype | [\u0027Speech Recognition\u0027, \u0027Deep Learning\u0027, \u0027Cloud Platforms\u0027] | [\u0027Speech Processing\u0027, \u0027Embedded Systems\u0027, \u0027Frontend Development\u0027] | Estimated completion in 6 months | Voice datasets for training speech recognition models. | Enable natural voice-based interactions with smart home ecosystems. | [\u0027Software Engineer\u0027, \u0027Speech Recognition Expert\u0027, \u0027UI/UX Designer\u0027]"}, {"color": "#97c2fc", "id": "user8", "label": "user8", "shape": "dot", "size": 10, "title": "This contributor has experience in Project Management, Domain Knowledge (Specify in Other), Frontend Development, Other (Specify) and is proficient in technologies like Cloud Computing, Deep Learning, Computer Vision, Data Analytics/Visualization. They are interested in roles such as Machine Learning Engineer, Designer, Data Engineer and prefer Part-time collaboration. With 5+ years of experience, they are available for Available 14 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "Autonomous Drone Navigation Using AI", "label": "Autonomous Drone Navigation Using AI", "shape": "dot", "size": 10, "title": "Autonomous Drone Navigation Using AI | Designing an AI system to enable drones to autonomously navigate and avoid obstacles. | Building a system that integrates AI for real-time pathfinding and collision avoidance. | Completed prototype | [\u0027Computer Vision\u0027, \u0027Reinforcement Learning\u0027, \u0027Autonomous Systems\u0027] | [\u0027Pathfinding Algorithms\u0027, \u0027Embedded Systems\u0027, \u0027AI Programming\u0027] | Estimated completion in 5 months | Simulated navigation environments and real-world drone telemetry data. | Improve drone safety and efficiency in navigation through complex environments. | [\u0027AI Engineer\u0027, \u0027Robotics Specialist\u0027, \u0027Embedded Systems Developer\u0027]"}, {"color": "#97c2fc", "id": "Personalized Learning Platform Using AI", "label": "Personalized Learning Platform Using AI", "shape": "dot", "size": 10, "title": "Personalized Learning Platform Using AI | Designing a personalized learning platform that adapts to individual student needs using AI. | Leveraging AI to analyze learning patterns and customize educational content. | Other (Specify) | [\u0027Adaptive Learning Models\u0027, \u0027Natural Language Processing\u0027, \u0027Cloud Platforms\u0027] | [\u0027Educational Psychology\u0027, \u0027Machine Learning\u0027, \u0027Web Development\u0027] | Estimated completion in 7 months | Educational datasets including student learning histories. | Provide a tailored learning experience to enhance student outcomes. | [\u0027Educational Specialist\u0027, \u0027AI Developer\u0027, \u0027Web Developer\u0027]"}, {"color": "#97c2fc", "id": "AI-Based Crop Yield Prediction System", "label": "AI-Based Crop Yield Prediction System", "shape": "dot", "size": 10, "title": "AI-Based Crop Yield Prediction System | Building a system to predict crop yields based on environmental and historical data. | Combining AI with data analytics to forecast agricultural productivity. | Completed prototype | [\u0027Data Analytics\u0027, \u0027Machine Learning\u0027, \u0027IoT\u0027] | [\u0027Agricultural Science\u0027, \u0027Data Analytics\u0027, \u0027Machine Learning\u0027] | Estimated completion in 5 months | Crop yield data, weather patterns, and soil information. | Help farmers make data-driven decisions to maximize crop yields. | [\u0027Agronomist\u0027, \u0027Data Engineer\u0027, \u0027Machine Learning Specialist\u0027]"}, {"color": "#97c2fc", "id": "user7", "label": "user7", "shape": "dot", "size": 10, "title": "This contributor has experience in Project Management, UI/UX Design, Data Engineering, Model Training and Optimization and is proficient in technologies like Other (Specify), Cloud Computing, Deep Learning, Natural Language Processing (NLP). They are interested in roles such as Data Scientist and prefer Part-time collaboration. With 1\u20133 years of experience, they are available for Available 10 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "Natural Language Processing for Legal Document Analysis", "label": "Natural Language Processing for Legal Document Analysis", "shape": "dot", "size": 10, "title": "Natural Language Processing for Legal Document Analysis | Using NLP to extract key information and summarize legal documents efficiently. | Creating algorithms to parse and summarize large volumes of text data from legal documents. | Other (Specify) | [\u0027Natural Language Processing\u0027, \u0027Data Analytics\u0027, \u0027Machine Learning\u0027] | [\u0027NLP Algorithms\u0027, \u0027Data Analysis\u0027, \u0027Legal Knowledge\u0027] | Estimated completion in 7 months | Large corpora of legal texts and contracts. | Streamline the process of analyzing legal documents, saving time and resources. | [\u0027NLP Specialist\u0027, \u0027Legal Consultant\u0027, \u0027Data Analyst\u0027]"}, {"color": "#97c2fc", "id": "AI-Powered Traffic Management System", "label": "AI-Powered Traffic Management System", "shape": "dot", "size": 10, "title": "AI-Powered Traffic Management System | Creating an AI system to optimize traffic flow and reduce congestion in urban areas. | Deploying AI to predict and manage traffic patterns using real-time data. | Idea stage | [\u0027Machine Learning\u0027, \u0027Big Data\u0027, \u0027IoT\u0027] | [\u0027Traffic Engineering\u0027, \u0027AI Development\u0027, \u0027Data Analysis\u0027] | Estimated completion in 9 months | Traffic flow data from sensors and cameras. | Improve traffic efficiency and reduce travel times in cities. | [\u0027AI Researcher\u0027, \u0027Urban Planner\u0027, \u0027Data Analyst\u0027]"}, {"color": "#97c2fc", "id": "user6", "label": "user6", "shape": "dot", "size": 10, "title": "This contributor has experience in Domain Knowledge (Specify in Other), Other (Specify) and is proficient in technologies like Reinforcement Learning, Computer Vision, Data Analytics/Visualization. They are interested in roles such as Machine Learning Engineer, Software Developer and prefer Full-time collaboration. With 1\u20133 years of experience, they are available for Available 6 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "Image Recognition System for Healthcare", "label": "Image Recognition System for Healthcare", "shape": "dot", "size": 10, "title": "Image Recognition System for Healthcare | Creating an image recognition system to assist doctors in diagnosing diseases from medical scans. | Building a system capable of classifying and detecting abnormalities in medical imagery. | Completed prototype | [\u0027Convolutional Neural Networks\u0027, \u0027TensorFlow\u0027, \u0027PyTorch\u0027] | [\u0027Data Annotation\u0027, \u0027Machine Learning\u0027, \u0027Medical Domain Knowledge\u0027] | Estimated completion in 4 months | Labeled medical images such as X-rays, MRIs. | Assist healthcare professionals in diagnosing diseases with greater accuracy and speed. | [\u0027Data Scientist\u0027, \u0027Healthcare Specialist\u0027, \u0027Software Engineer\u0027]"}, {"color": "#97c2fc", "id": "user5", "label": "user5", "shape": "dot", "size": 10, "title": "This contributor has experience in Data Cleaning and Preprocessing, UI/UX Design, Project Management, Backend Development and is proficient in technologies like Cloud Computing, Other (Specify), Natural Language Processing (NLP). They are interested in roles such as Data Engineer and prefer Volunteer-based collaboration. With 3\u20135 years of experience, they are available for Available 20 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user4", "label": "user4", "shape": "dot", "size": 10, "title": "This contributor has experience in Frontend Development, Data Cleaning and Preprocessing, Data Engineering, Backend Development and is proficient in technologies like Computer Vision, Deep Learning, Data Analytics/Visualization. They are interested in roles such as Other (Specify), Data Engineer and prefer Part-time collaboration. With 5+ years of experience, they are available for Available 18 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user24", "label": "user24", "shape": "dot", "size": 10, "title": "This contributor has experience in Backend Development, Project Management, Data Engineering, Model Training and Optimization and is proficient in technologies like Big Data, Computer Vision, Deep Learning. They are interested in roles such as Data Engineer and prefer Volunteer-based collaboration. With Less than 1 year of experience, they are available for Available 10 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user22", "label": "user22", "shape": "dot", "size": 10, "title": "This contributor has experience in Model Training and Optimization, Domain Knowledge (Specify in Other) and is proficient in technologies like Natural Language Processing (NLP), Deep Learning, Cloud Computing, Big Data. They are interested in roles such as Software Developer and prefer Part-time collaboration. With 3\u20135 years of experience, they are available for Available 10 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user2", "label": "user2", "shape": "dot", "size": 10, "title": "This contributor has experience in Model Training and Optimization, UI/UX Design, Backend Development and is proficient in technologies like Other (Specify), Natural Language Processing (NLP), Big Data, Cloud Computing. They are interested in roles such as Machine Learning Engineer and prefer Other (Specify) collaboration. With Less than 1 year of experience, they are available for Available 13 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "AI-Driven Predictive Analytics for Sales", "label": "AI-Driven Predictive Analytics for Sales", "shape": "dot", "size": 10, "title": "AI-Driven Predictive Analytics for Sales | Building a predictive model to analyze sales trends and forecast future sales performance. | Developing models for demand forecasting and customer behavior prediction. | Idea stage | [\u0027Machine Learning\u0027, \u0027Big Data\u0027, \u0027Cloud Computing\u0027] | [\u0027Data Engineering\u0027, \u0027Sales Expertise\u0027, \u0027Cloud Infrastructure Management\u0027] | Estimated completion in 8 months | Sales records, customer interaction logs, and historical data. | Enable businesses to make data-driven decisions and improve revenue forecasting. | [\u0027Data Engineer\u0027, \u0027Sales Analyst\u0027, \u0027Cloud Engineer\u0027]"}, {"color": "#97c2fc", "id": "AI-Enhanced Fraud Detection in Banking", "label": "AI-Enhanced Fraud Detection in Banking", "shape": "dot", "size": 10, "title": "AI-Enhanced Fraud Detection in Banking | Building AI models to detect and prevent fraudulent transactions in banking systems. | Creating advanced fraud detection models using machine learning. | Ready for deployment | [\u0027Anomaly Detection\u0027, \u0027Machine Learning\u0027, \u0027Python\u0027] | [\u0027Fraud Analysis\u0027, \u0027Data Engineering\u0027, \u0027Model Deployment\u0027] | Estimated completion in 4 months | Banking transaction datasets with labeled fraud instances. | Minimize financial losses by identifying fraudulent activities in real-time. | [\u0027Data Scientist\u0027, \u0027Fraud Analyst\u0027, \u0027Software Developer\u0027]"}, {"color": "#97c2fc", "id": "user1", "label": "user1", "shape": "dot", "size": 10, "title": "This contributor has experience in Data Engineering, Backend Development, Other (Specify) and is proficient in technologies like Big Data, Data Analytics/Visualization, Natural Language Processing (NLP), Other (Specify). They are interested in roles such as Machine Learning Engineer, Data Scientist and prefer Volunteer-based collaboration. With 5+ years of experience, they are available for Available 17 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user17", "label": "user17", "shape": "dot", "size": 10, "title": "This contributor has experience in Data Cleaning and Preprocessing, Project Management, Domain Knowledge (Specify in Other) and is proficient in technologies like Data Analytics/Visualization, Cloud Computing. They are interested in roles such as Machine Learning Engineer and prefer Other (Specify) collaboration. With 3\u20135 years of experience, they are available for Available 10 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user16", "label": "user16", "shape": "dot", "size": 10, "title": "This contributor has experience in Model Training and Optimization, Other (Specify), UI/UX Design and is proficient in technologies like Data Analytics/Visualization, Natural Language Processing (NLP), Cloud Computing, Computer Vision. They are interested in roles such as Data Engineer, Data Scientist and prefer Full-time collaboration. With 3\u20135 years of experience, they are available for Available 12 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user13", "label": "user13", "shape": "dot", "size": 10, "title": "This contributor has experience in Other (Specify), Frontend Development, Data Engineering, UI/UX Design and is proficient in technologies like Computer Vision, Natural Language Processing (NLP), Reinforcement Learning. They are interested in roles such as Researcher and prefer Full-time collaboration. With 3\u20135 years of experience, they are available for Available 5 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user12", "label": "user12", "shape": "dot", "size": 10, "title": "This contributor has experience in UI/UX Design, Other (Specify) and is proficient in technologies like Natural Language Processing (NLP), Reinforcement Learning. They are interested in roles such as Designer, Data Engineer and prefer Part-time collaboration. With Less than 1 year of experience, they are available for Available 10 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user11", "label": "user11", "shape": "dot", "size": 10, "title": "This contributor has experience in UI/UX Design, Backend Development, Data Cleaning and Preprocessing and is proficient in technologies like Deep Learning, Natural Language Processing (NLP), Other (Specify), Computer Vision. They are interested in roles such as Data Engineer and prefer Full-time collaboration. With 5+ years of experience, they are available for Available 17 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user9", "label": "user9", "shape": "dot", "size": 10, "title": "This contributor has experience in Model Training and Optimization, Other (Specify) and is proficient in technologies like Deep Learning, Reinforcement Learning, Other (Specify). They are interested in roles such as Other (Specify), Machine Learning Engineer, Designer and prefer Part-time collaboration. With Less than 1 year of experience, they are available for Available 11 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user0", "label": "user0", "shape": "dot", "size": 10, "title": "This contributor has experience in UI/UX Design, Data Engineering and is proficient in technologies like Deep Learning, Reinforcement Learning, Natural Language Processing (NLP), Data Analytics/Visualization. They are interested in roles such as Data Scientist, Researcher and prefer Volunteer-based collaboration. With 3\u20135 years of experience, they are available for Available 11 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user3", "label": "user3", "shape": "dot", "size": 10, "title": "This contributor has experience in Frontend Development, UI/UX Design and is proficient in technologies like Data Analytics/Visualization, Big Data, Other (Specify), Cloud Computing. They are interested in roles such as Researcher and prefer Other (Specify) collaboration. With 3\u20135 years of experience, they are available for Available 17 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user23", "label": "user23", "shape": "dot", "size": 10, "title": "This contributor has experience in UI/UX Design, Domain Knowledge (Specify in Other) and is proficient in technologies like Natural Language Processing (NLP), Computer Vision, Cloud Computing. They are interested in roles such as Other (Specify) and prefer Other (Specify) collaboration. With 3\u20135 years of experience, they are available for Available 16 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user21", "label": "user21", "shape": "dot", "size": 10, "title": "This contributor has experience in Domain Knowledge (Specify in Other), UI/UX Design, Data Engineering, Project Management and is proficient in technologies like Deep Learning, Computer Vision. They are interested in roles such as Other (Specify), Data Scientist and prefer Volunteer-based collaboration. With 3\u20135 years of experience, they are available for Available 13 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user19", "label": "user19", "shape": "dot", "size": 10, "title": "This contributor has experience in Backend Development, UI/UX Design and is proficient in technologies like Data Analytics/Visualization, Cloud Computing. They are interested in roles such as Other (Specify) and prefer Other (Specify) collaboration. With 1\u20133 years of experience, they are available for Available 5 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user18", "label": "user18", "shape": "dot", "size": 10, "title": "This contributor has experience in Domain Knowledge (Specify in Other), Project Management, UI/UX Design, Other (Specify) and is proficient in technologies like Computer Vision, Natural Language Processing (NLP), Other (Specify), Big Data. They are interested in roles such as Other (Specify), Data Engineer and prefer Other (Specify) collaboration. With 3\u20135 years of experience, they are available for Available 15 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user15", "label": "user15", "shape": "dot", "size": 10, "title": "This contributor has experience in Other (Specify), Model Training and Optimization, UI/UX Design and is proficient in technologies like Big Data, Natural Language Processing (NLP), Computer Vision. They are interested in roles such as Domain Expert and prefer Volunteer-based collaboration. With 3\u20135 years of experience, they are available for Available 13 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user14", "label": "user14", "shape": "dot", "size": 10, "title": "This contributor has experience in Domain Knowledge (Specify in Other), UI/UX Design, Project Management and is proficient in technologies like Other (Specify), Computer Vision, Deep Learning, Big Data. They are interested in roles such as Domain Expert, Software Developer, Researcher and prefer Full-time collaboration. With Less than 1 year of experience, they are available for Available 17 hours per week. Flexible schedule.."}, {"color": "#97c2fc", "id": "user10", "label": "user10", "shape": "dot", "size": 10, "title": "This contributor has experience in Frontend Development, Data Engineering, Backend Development and is proficient in technologies like Deep Learning, Other (Specify). They are interested in roles such as Other (Specify), Data Engineer, Software Developer and prefer Part-time collaboration. With Less than 1 year of experience, they are available for Available 11 hours per week. Flexible schedule.."}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "salmon", "from": "user20", "to": "AI-Powered Chatbot for Customer Support", "width": 0.8906993036371419}, {"arrows": "to", "color": "salmon", "from": "user20", "to": "Voice Recognition for Smart Home Devices", "width": 0.9120773690799888}, {"arrows": "to", "color": "coral", "from": "user8", "to": "Autonomous Drone Navigation Using AI", "width": 0.9299503981808381}, {"arrows": "to", "color": "magenta", "from": "user8", "to": "Personalized Learning Platform Using AI", "width": 0.9543566651541688}, {"arrows": "to", "color": "indigo", "from": "user8", "to": "AI-Based Crop Yield Prediction System", "width": 0.9479258485912528}, {"arrows": "to", "color": "purple", "from": "user7", "to": "AI-Powered Chatbot for Customer Support", "width": 1.0}, {"arrows": "to", "color": "brown", "from": "user7", "to": "Natural Language Processing for Legal Document Analysis", "width": 0.9270881301587184}, {"arrows": "to", "color": "black", "from": "user7", "to": "AI-Powered Traffic Management System", "width": 0.947841279386065}, {"arrows": "to", "color": "lime", "from": "user7", "to": "Voice Recognition for Smart Home Devices", "width": 0.9398469180201324}, {"arrows": "to", "color": "silver", "from": "user7", "to": "Personalized Learning Platform Using AI", "width": 0.9758666593904551}, {"arrows": "to", "color": "violet", "from": "user6", "to": "Image Recognition System for Healthcare", "width": 0.9423350388314625}, {"arrows": "to", "color": "coral", "from": "user6", "to": "Autonomous Drone Navigation Using AI", "width": 0.9293887863593951}, {"arrows": "to", "color": "blue", "from": "user6", "to": "Personalized Learning Platform Using AI", "width": 0.9283987073900184}, {"arrows": "to", "color": "purple", "from": "user5", "to": "AI-Powered Chatbot for Customer Support", "width": 0.9789683236129619}, {"arrows": "to", "color": "gold", "from": "user5", "to": "Natural Language Processing for Legal Document Analysis", "width": 0.9819281258096487}, {"arrows": "to", "color": "yellow", "from": "user4", "to": "Image Recognition System for Healthcare", "width": 0.9588295238128266}, {"arrows": "to", "color": "gray", "from": "user4", "to": "AI-Based Crop Yield Prediction System", "width": 0.9259730474311433}, {"arrows": "to", "color": "orange", "from": "user24", "to": "Autonomous Drone Navigation Using AI", "width": 1.0}, {"arrows": "to", "color": "brown", "from": "user22", "to": "Natural Language Processing for Legal Document Analysis", "width": 0.9643257538842661}, {"arrows": "to", "color": "lime", "from": "user22", "to": "Voice Recognition for Smart Home Devices", "width": 1.0}, {"arrows": "to", "color": "red", "from": "user2", "to": "AI-Powered Chatbot for Customer Support", "width": 0.9701376175152497}, {"arrows": "to", "color": "turquoise", "from": "user2", "to": "AI-Driven Predictive Analytics for Sales", "width": 0.9170443012009599}, {"arrows": "to", "color": "orange", "from": "user2", "to": "Autonomous Drone Navigation Using AI", "width": 0.9776015462913235}, {"arrows": "to", "color": "lime", "from": "user2", "to": "Voice Recognition for Smart Home Devices", "width": 0.9900928372584362}, {"arrows": "to", "color": "purple", "from": "user2", "to": "AI-Enhanced Fraud Detection in Banking", "width": 0.9647698377065286}, {"arrows": "to", "color": "silver", "from": "user2", "to": "Personalized Learning Platform Using AI", "width": 1.0}, {"arrows": "to", "color": "teal", "from": "user2", "to": "AI-Based Crop Yield Prediction System", "width": 0.9663422958162277}, {"arrows": "to", "color": "gray", "from": "user1", "to": "AI-Driven Predictive Analytics for Sales", "width": 0.9849699703496615}, {"arrows": "to", "color": "gold", "from": "user1", "to": "Natural Language Processing for Legal Document Analysis", "width": 1.0}, {"arrows": "to", "color": "gold", "from": "user1", "to": "AI-Powered Traffic Management System", "width": 0.9548862479079168}, {"arrows": "to", "color": "yellow", "from": "user1", "to": "AI-Enhanced Fraud Detection in Banking", "width": 0.9767910649023399}, {"arrows": "to", "color": "teal", "from": "user1", "to": "AI-Based Crop Yield Prediction System", "width": 0.9319518765272534}, {"arrows": "to", "color": "navy", "from": "user17", "to": "Image Recognition System for Healthcare", "width": 0.956185855506686}, {"arrows": "to", "color": "turquoise", "from": "user17", "to": "AI-Driven Predictive Analytics for Sales", "width": 1.0}, {"arrows": "to", "color": "gold", "from": "user17", "to": "Natural Language Processing for Legal Document Analysis", "width": 0.9738381742372925}, {"arrows": "to", "color": "gold", "from": "user17", "to": "AI-Powered Traffic Management System", "width": 1.0}, {"arrows": "to", "color": "purple", "from": "user17", "to": "AI-Enhanced Fraud Detection in Banking", "width": 1.0}, {"arrows": "to", "color": "silver", "from": "user17", "to": "Personalized Learning Platform Using AI", "width": 0.9837207746242004}, {"arrows": "to", "color": "teal", "from": "user17", "to": "AI-Based Crop Yield Prediction System", "width": 1.0}, {"arrows": "to", "color": "navy", "from": "user16", "to": "Image Recognition System for Healthcare", "width": 1.0}, {"arrows": "to", "color": "turquoise", "from": "user16", "to": "AI-Driven Predictive Analytics for Sales", "width": 0.9164467997819502}, {"arrows": "to", "color": "orange", "from": "user16", "to": "Autonomous Drone Navigation Using AI", "width": 0.9984449427165529}, {"arrows": "to", "color": "gold", "from": "user16", "to": "AI-Powered Traffic Management System", "width": 0.9595586493826381}, {"arrows": "to", "color": "purple", "from": "user16", "to": "AI-Enhanced Fraud Detection in Banking", "width": 0.955785157725331}, {"arrows": "to", "color": "red", "from": "user13", "to": "AI-Powered Chatbot for Customer Support", "width": 0.9653111430619475}, {"arrows": "to", "color": "salmon", "from": "user12", "to": "AI-Powered Chatbot for Customer Support", "width": 1.0}, {"arrows": "to", "color": "salmon", "from": "user12", "to": "Voice Recognition for Smart Home Devices", "width": 1.0}, {"arrows": "to", "color": "salmon", "from": "user11", "to": "AI-Powered Chatbot for Customer Support", "width": 0.9064515469746878}, {"arrows": "to", "color": "navy", "from": "user11", "to": "Image Recognition System for Healthcare", "width": 0.9586083177998793}, {"arrows": "to", "color": "salmon", "from": "user11", "to": "Voice Recognition for Smart Home Devices", "width": 0.9096220838168136}, {"arrows": "to", "color": "violet", "from": "user9", "to": "Image Recognition System for Healthcare", "width": 1.0}, {"arrows": "to", "color": "coral", "from": "user9", "to": "Autonomous Drone Navigation Using AI", "width": 1.0}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "forceAtlas2Based": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.01,
+            "damping": 0.4,
+            "gravitationalConstant": -50,
+            "springConstant": 0.01,
+            "springLength": 100
+        },
+        "solver": "forceAtlas2Based",
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
