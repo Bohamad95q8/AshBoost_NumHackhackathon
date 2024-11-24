@@ -3,58 +3,70 @@
 Welcome to **ASHBoost's** repository for the NumHack Hackathon 2024. We are participating in the **Analyze Track**, showcasing our solution to analyze and extract insights using innovative techniques.  
 
 ---
-
-## Table of Contents
-1. [Introduction](#introduction)  
-2. [Problem Statement](#problem-statement)  
-3. [Solution Overview](#solution-overview)  
-4. [Results](#results)  
-5. [How to Run](#how-to-run)  
-6. [Team](#team)  
-7. [License](#license)  
+## Overview
+This project demonstrates a proof-of-concept for matching contributors to AI projects using synthetic datasets. The results are analyzed and visualized as directed graphs, providing actionable insights and showcasing relationships between projects and contributors.
 
 ---
 
-## Introduction
-
-The NumHack Hackathon 2024 challenges participants to innovate in the Analyze Track. Our project leverages advanced data science and machine learning techniques to deliver actionable insights from complex datasets.
-
----
-
-## Problem Statement
-
-The Analyze Track focuses on extracting meaningful information from data to address significant challenges. Our team tackles [briefly describe the specific problem you're addressing, e.g., optimizing traffic patterns, predicting trends, etc.].  
-
----
-
-## Solution Overview
-
-Our approach involves:  
-1. **Data Processing:** Cleaning and preprocessing raw data for analysis.  
-2. **Feature Engineering:** Identifying key features driving insights.  
-3. **Modeling:** Leveraging cutting-edge machine learning techniques.  
-4. **Visualization:** Interactive dashboards to make insights actionable.
-
-### Tools and Libraries
-- Python
-- NumPy
-- Pandas
-- Matplotlib/Seaborn
-- Scikit-learn
-- [Any other key libraries/tools]
+## How It Works
+1. **Datasets**:
+   - `AI_Projects_Populated_with_Summary.csv`: Contains project titles, required skills, summaries, and roles.
+   - `Contributors_with_Summary.csv`: Contains contributor details, skills, summaries, and GitHub/portfolio links.
+2. **Analysis**:
+   - Match contributors to projects using SentenceTransformer embeddings and cosine similarity.
+   - Generate compatibility scores for skills and project roles.
+3. **Visualization**:
+   - Use NetworkX and pyvis to create directed graphs showing project-contributor relationships.
+   - Include dropdown menus for selecting projects and exploring skills dynamically.
 
 ---
 
-## Results
+## Frameworks and Techniques
+### Frameworks
+- **SentenceTransformers**: Used to encode textual summaries into embeddings.
+- **NetworkX and pyvis**: For graph-based visualization of project-contributor relationships.
+- **Pandas and NumPy**: For data preprocessing and analysis.
+- **IPython Widgets**: For interactive dropdown menus.
 
-Our solution demonstrates:  
-- [Key metric/accuracy improvements]  
-- [Brief description of outcomes and impact]  
-- [Visuals or results summary, if applicable]  
+### Techniques
+- Embedding generation for semantic similarity.
+- Cosine similarity for skill matching.
+- Directed graph representation to showcase relationships.
 
-Detailed results can be found in the [Results Notebook](https://colab.research.google.com/drive/1AvOwKIHHORKKLl_w3bhTwHoIBBW0maKo?usp=sharing).
+### Dataset
+Synthetic datasets were generated to simulate real-world scenarios for proof of concept:
+- Projects with required skills, summaries, and roles.
+- Contributors with expertise summaries and portfolios.
 
 ---
+
+## Findings, Difficulties, and Limitations
+### Findings
+- Graph visualization effectively highlights relationships and compatibility.
+- Dropdown menus provide an intuitive interface for data exploration.
+
+### Difficulties
+- Handling diverse skill representations in synthetic data.
+- Balancing graph clarity with the number of nodes and edges.
+
+### Limitations
+- Synthetic data lacks the complexity of real-world datasets.
+- Matching relies heavily on embeddings and may require real-world calibration.
+
+---
+
+## Future Directions
+- Incorporate real-world datasets for validation and refinement.
+- Implement machine learning-based recommendation systems for matching.
+- Scale graph visualizations for larger datasets and communities.
+
+---
+
+## Build Instructions
+### Dependencies
+Install the required libraries:
+```bash
+pip install -r requirements.txt
 
 ## How to Run
 
