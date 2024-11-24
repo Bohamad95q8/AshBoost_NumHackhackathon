@@ -1,6 +1,18 @@
-[![Open in Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1AvOwKIHHORKKLl_w3bhTwHoIBBW0maKo?usp=sharing)
-
 # ASHBoost - NumHack Hackathon 2024 Analyze Track
+
+Welcome to **ASHBoost's** repository for the NumHack Hackathon 2024.  
+
+[![Open in Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1AvOwKIHHORKKLl_w3bhTwHoIBBW0maKo?usp=sharing)
+[![Python](https://img.shields.io/badge/Python-3.8-blue?logo=python&logoColor=white)](https://www.python.org/)
+
+---
+
+## Features
+
+- 🧪 **Experiment Notebook**: [Colab Notebook](https://colab.research.google.com/drive/1AvOwKIHHORKKLl_w3bhTwHoIBBW0maKo?usp=sharing)
+- 📊 **Visualization Tools**: Interactive dashboards for data exploration.
+- ⚙️ **Dependencies**: Python, NumPy, Pandas
+
 
 Welcome to **ASHBoost's** repository for the NumHack Hackathon 2024. We are participating in the **Analyze Track**, showcasing our solution to analyze and extract insights using innovative techniques.  
 
