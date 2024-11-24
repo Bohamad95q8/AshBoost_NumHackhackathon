@@ -88,5 +88,4 @@ Follow these steps to reproduce our results:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ASHBoost/numhack-2024.git
-   cd numhack-2024
+   git clone https://github.com/Bohamad95q8/AshBoost_NumHackhackathon.git
