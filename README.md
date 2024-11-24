@@ -1,4 +1,4 @@
-# ![ASHBoost Banner](https://github.com/Bohamad95q8/AshBoost_NumHackhackathon/blob/main/Image/ASHBoostNumHack2024Analysis%20Kuwait.png)
+![ASHBoost Banner](https://github.com/Bohamad95q8/AshBoost_NumHackhackathon/blob/main/Image/ASHBoostNumHack2024Analysis%20Kuwait.png)
 
 # ASHBoost - NumHack Hackathon 2024 Analyze Track
 
