@@ -74,10 +74,12 @@ Synthetic datasets were generated to simulate real-world scenarios for proof of 
 ### Difficulties
 - Handling diverse skill representations in synthetic data.
 - Balancing graph clarity with the number of nodes and edges.
+- Giving new comers a chance to work and have experience will be hard.
 
 ### Limitations
 - Synthetic data lacks the complexity of real-world datasets.
 - Matching relies heavily on embeddings and may require real-world calibration.
+  
 
 ---
 
@@ -85,6 +87,7 @@ Synthetic datasets were generated to simulate real-world scenarios for proof of 
 - Incorporate real-world datasets for validation and refinement.
 - Implement machine learning-based recommendation systems for matching.
 - Scale graph visualizations for larger datasets and communities.
+- Building an Application to handle the collecting of data as forms, analyzing the data, the producing the visualization outputs.
 
 ---
 
